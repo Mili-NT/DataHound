@@ -40,7 +40,7 @@ def PrintError(Msg):
         else:
                 print('\033[1;31m[!]\033[1;m ' + Msg)
 
-def PrintFileMatch(Msg):
+def PrintFatal(Msg):
         if os.name == 'nt':
                 print('[$] ' + Msg)
         else:
