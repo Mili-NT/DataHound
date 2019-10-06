@@ -9,9 +9,6 @@ from os.path import isdir, isfile
 from configparser import ConfigParser
 from concurrent.futures import ThreadPoolExecutor
 
-# FTP Protocol: TCP
-# FTP Default Port: 21
-# FTP Success Code: 230
 # TODO (Planned Features): Bug testing, File filtering
 
 #
