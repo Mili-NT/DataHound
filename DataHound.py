@@ -1,16 +1,18 @@
 import lib
 import codecs
+import masscan
 import shodan
 import ftplib
 from os import path
 from sys import path as syspath
 from os.path import isdir, isfile
 from configparser import ConfigParser
+from concurrent.futures import ThreadPoolExecutor
 
 # FTP Protocol: TCP
 # FTP Default Port: 21
 # FTP Success Code: 230
-# TODO (Planned Features): Add masscan searching, File filtering
+# TODO (Planned Features): Bug testing, File filtering
 
 #
 # Functions
@@ -96,15 +98,29 @@ def shodan_scan(key, local_dir):
 		results = api.search('port:"21" filter:"230 login successful"')
 		for i in results:
 			addr_list.append(i['ip_str'])
+		executor = ThreadPoolExecutor(max_workers=300)
 		for a in addr_list:
-			ftp_operations(a, local_dir)
+			executor.submit(ftp_operations(a, local_dir))
 	except shodan.APIError as e:
 		lib.PrintFatal(e)
 		exit()
 def file_scan(address_file, local_dir):
+	count = 0
 	with open(address_file, 'r') as afile:
+		for i in afile.readlines():
+			count += 1
+		executor = ThreadPoolExecutor(max_workers=count)
 		for line in afile.readlines():
-			ftp_operations(line, local_dir)
+			executor.submit(ftp_operations(line, local_dir))
+def masscan(local_dir):
+	mas = masscan.PortScanner()
+	mas.scan('0.0.0.0/0', ports='21', arguments='--max-rate 1000 --exclude 255.255.255.255 --open-only')
+	count = 0
+	for i in mas.all_hosts():
+		count += 1
+	executor = ThreadPoolExecutor(max_workers=count)
+	for host in mas.all_hosts():
+		executor.submit(ftp_operations(host, local_dir))
 def ftp_operations(host, output_location): # TODO: Find out how to check and record file sizes in relation to FTP
 	if output_location.endswith('/') is False:
 		output_location = output_location + '/'
