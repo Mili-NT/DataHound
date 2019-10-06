@@ -15,7 +15,7 @@ def PrintTitle():
         if os.name == 'nt':
                 print(splash)
         else:
-                print('\033[1;32m[+]\033[1;m ' + splash)
+                print('\033[1;35m[+]\033[1;m ' + splash)
 def PrintSuccess(Msg):
         if os.name == 'nt':
                 print('[+] ' + Msg)
