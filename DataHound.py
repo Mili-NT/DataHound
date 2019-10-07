@@ -2,6 +2,7 @@ import lib
 import shodan
 import codecs
 import ftplib
+import masscan
 from os import path
 from sys import path as syspath
 from os.path import isdir, isfile
