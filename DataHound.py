@@ -1,13 +1,14 @@
 import lib
-import codecs
-import masscan
 import shodan
+import codecs
 import ftplib
 from os import path
 from sys import path as syspath
 from os.path import isdir, isfile
 from configparser import ConfigParser
 from concurrent.futures import ThreadPoolExecutor
+
+
 
 # TODO (Planned Features): Bug testing, File filtering
 
@@ -54,12 +55,16 @@ def manual_setup():
 				config_name = input("Enter the name for this configuration: ")
 				with codecs.open(f'{syspath[0]}/{config_name}.ini', 'w', 'utf-8') as cfile:
 					cfile.write('[vars]')
+					cfile.write('\n')
 					cfile.write(f'local_dir = {local_dir}')
+					cfile.write('\n')
 					cfile.write(f'search_type = {search_type}')
+					cfile.write('\n')
 					if search_type == 's':
 						cfile.write(f'shodan_key = {shodan_key}')
 					elif search_type == 'f':
 						cfile.write(f'address_file = {address_file}')
+				break
 	if search_type == 's':
 		ret_dict = {'local_dir': local_dir, 'search_type': search_type, 'shodan_key':shodan_key}
 	elif search_type == 'f':
@@ -92,14 +97,14 @@ def shodan_scan(key, local_dir):
 	addr_list = []
 	api = shodan.Shodan(key)
 	try:
-		results = api.search('port:"21" filter:"230 login successful"')
-		for i in results:
-			addr_list.append(i['ip_str'])
+		results = api.search('port:21 filter:230 login successful')
+		for result in results['matches']:
+			addr_list.append(result['ip_str'])
 		executor = ThreadPoolExecutor(max_workers=300)
 		for a in addr_list:
 			executor.submit(ftp_operations(a, local_dir))
 	except shodan.APIError as e:
-		lib.PrintFatal(e)
+		lib.PrintFatal(f'Fatal Error: {e}')
 		exit()
 def file_scan(address_file, local_dir):
 	count = 0
@@ -109,7 +114,7 @@ def file_scan(address_file, local_dir):
 		executor = ThreadPoolExecutor(max_workers=count)
 		for line in afile.readlines():
 			executor.submit(ftp_operations(line, local_dir))
-def masscan(local_dir):
+def masscan_scan(local_dir):
 	mas = masscan.PortScanner()
 	mas.scan('0.0.0.0/0', ports='21', arguments='--max-rate 1000 --exclude 255.255.255.255 --open-only')
 	count = 0
@@ -133,7 +138,7 @@ def ftp_operations(host, output_location): # TODO: Find out how to check and rec
 			ftp_connection.retrbinary('RETR ' + filename, file.write)
 
 	except Exception as e:
-		lib.PrintError(e)
+		lib.PrintError(f'{e}')
 def main():
 	lib.PrintTitle()
 	while True:
@@ -145,14 +150,30 @@ def main():
 			vars_dict = load_config()
 			if vars_dict['search_type'] == 's':
 				shodan_scan(vars_dict['shodan_key'], vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
 			elif vars_dict['search_type'] == 'f':
 				file_scan(vars_dict['address_file'], vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
+			else:
+				masscan_scan(vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
 		else:
 			vars_dict = manual_setup()
 			if vars_dict['search_type'] == 's':
 				shodan_scan(vars_dict['shodan_key'], vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
 			elif vars_dict['search_type'] == 'f':
 				file_scan(vars_dict['address_file'], vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
+			else:
+				masscan_scan(vars_dict['local_dir'])
+				lib.PrintSuccess("Scan Complete")
+				break
 #
 # Main
 #
