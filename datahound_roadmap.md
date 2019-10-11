@@ -4,7 +4,7 @@ https://github.com/Mili-NT/DataHound
 - Name: **DataHound**
 - Category: **Data Collection & Analysis**
 - Creator: **Mili**
-- Maintainers: **None*
+- Maintainers: **None**
 ## Project Purpose:
 DataHound uses one of three methods to search for exposed/public File Transfer Protocol servers.
 This tool searches for an open FTP port (21), and attempts to login using anonymous credentials.
