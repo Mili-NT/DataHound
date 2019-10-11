@@ -13,7 +13,7 @@ DataHound can use shodan querying, masscan ip range scanning, or file input for 
 ## Project Intent:
 DataHound is primarily intended for Data Collection purposes, but can also be used in security engagements to test for exposed attack surface.
 It is designed to run continously for a long period of time on a system with a large amount of storage space.
-Because FTP servers regularly contain hundreds of gigabytes of data, exteneral hard drives are recommended.
+Because FTP servers regularly contain hundreds of gigabytes of data, external hard drives are recommended.
 ## Current Features:
 - Multithreaded
 - Three search types
